@@ -6,5 +6,6 @@ import java.util.Iterator;
  * @author VYZH
  * @since 11.01.2018
  */
-public interface Step<E> extends Iterator<E> {
+public abstract class Step<E> implements Iterator<E> {
+    protected Step<E> prev;
 }

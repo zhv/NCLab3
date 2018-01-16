@@ -6,7 +6,7 @@ import framework.source.Source;
  * @author VYZH
  * @since 11.01.2018
  */
-public class InputStep<E> implements Step<E> {
+public class InputStep<E> extends Step<E> {
 
     private Source<E> source;
 

@@ -7,4 +7,5 @@ import java.util.Iterator;
  * @since 11.01.2018
  */
 public interface Source<E> extends Iterator<E> {
+
 }

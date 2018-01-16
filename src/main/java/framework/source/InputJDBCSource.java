@@ -44,11 +44,6 @@ public class InputJDBCSource implements JDBCSource {
         return resultSet;
     }
 
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
-
     private synchronized void init() {
         if (resultSet == null) {
             try {
@@ -61,6 +56,5 @@ public class InputJDBCSource implements JDBCSource {
                 throw new IllegalStateException(e);
             }
         }
-
     }
 }
