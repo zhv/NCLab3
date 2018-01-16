@@ -1,11 +1,27 @@
 package framework.steps;
 
-import java.util.Iterator;
+import framework.source.Result;
+import framework.source.Source;
 
 /**
  * @author VYZH
  * @since 11.01.2018
  */
-public abstract class Step<E> implements Iterator<E> {
-    protected Step<E> prev;
+public class Step implements Runnable {
+
+    private Source source;
+    private Result result;
+
+    public Step(Source source, Result result) {
+        this.source = source;
+        this.result = result;
+    }
+
+    @Override
+    public void run() {
+        while (source.hasNext()) {
+            Object data = source.next();
+            result.accept(data);
+        }
+    }
 }
