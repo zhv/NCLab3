@@ -7,6 +7,7 @@ import framework.source.Source;
  * @author VYZH
  * @since 11.01.2018
  */
+
 public class Step implements Runnable {
 
     private Source source;
