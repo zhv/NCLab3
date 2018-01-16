@@ -49,7 +49,7 @@ public class InputJDBCSource implements JDBCSource {
             try {
                 Connection connection = dataSource.getConnection();
                 PreparedStatement ps = connection.prepareStatement(query);
-                preparedStatementBuilder.prepare(ps);
+                preparedStatementBuilder.prepare(ps, data);
                 ps.execute();
                 resultSet = ps.getResultSet();
             } catch (SQLException e) {
