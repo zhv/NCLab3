@@ -1,25 +1,28 @@
 package framework.source;
 
+import framework.StructuredData;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 
-public class OutputJDBCResult<E> implements Result<E> {
+public class OutputJDBCResult implements Result {
 
     private DataSource dataSource;
     private String query;
-    private PreparedStatementBuilder<E> preparedStatementBuilder;
+    private PreparedStatementBuilder preparedStatementBuilder;
     private PreparedStatement ps;
 
-    public OutputJDBCResult(DataSource dataSource, String query, PreparedStatementBuilder<E> preparedStatementBuilder) {
+    public OutputJDBCResult(DataSource dataSource, String query, PreparedStatementBuilder preparedStatementBuilder) {
         this.dataSource = dataSource;
         this.query = query;
         this.preparedStatementBuilder = preparedStatementBuilder;
     }
 
     @Override
-    public void accept(E data) {
+    public void accept(StructuredData data, boolean isDone) {
         init();
         try {
             preparedStatementBuilder.prepare(ps, data);

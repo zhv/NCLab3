@@ -1,22 +1,21 @@
 package framework.source;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import framework.StructuredData;
 
-/**
- * @author VYZH
- * @since 11.01.2018
- */
-public class InputJDBCSource implements JDBCSource {
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class InputJDBCSource implements Source {
 
     private DataSource dataSource;
     private String query;
     private PreparedStatementBuilder preparedStatementBuilder;
     private volatile ResultSet resultSet;
     private volatile Boolean next;
+    private ResultSetMetaData metaData;
+    private int columnCount;
 
     public InputJDBCSource(DataSource dataSource, String query, PreparedStatementBuilder preparedStatementBuilder) {
         this.dataSource = dataSource;
@@ -38,10 +37,21 @@ public class InputJDBCSource implements JDBCSource {
     }
 
     @Override
-    public synchronized ResultSet next() {
+    public synchronized StructuredData next() {
         init();
         next = null;
-        return resultSet;
+
+        Map<String, Object> row = new LinkedHashMap<>();
+
+        try {
+
+            for (int i = 1; i <= columnCount; i++)
+                row.put(metaData.getColumnName(i), resultSet.getObject(i));
+
+        } catch (Exception ignore) { }
+
+
+        return new StructuredData(row);
     }
 
     private synchronized void init() {
@@ -49,9 +59,11 @@ public class InputJDBCSource implements JDBCSource {
             try {
                 Connection connection = dataSource.getConnection();
                 PreparedStatement ps = connection.prepareStatement(query);
-                preparedStatementBuilder.prepare(ps, data);
+                preparedStatementBuilder.prepare(ps, null);
                 ps.execute();
                 resultSet = ps.getResultSet();
+                metaData = resultSet.getMetaData();
+                columnCount = metaData.getColumnCount();
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }

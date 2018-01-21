@@ -1,12 +1,11 @@
 package framework.source;
 
+import framework.StructuredData;
+
 import java.sql.PreparedStatement;
+import java.util.Map;
 
-/**
- * @author VYZH
- * @since 11.01.2018
- */
-public interface PreparedStatementBuilder<E> {
+public interface PreparedStatementBuilder {
 
-    void prepare(PreparedStatement ps, E data);
+    void prepare(PreparedStatement ps, StructuredData data);
 }

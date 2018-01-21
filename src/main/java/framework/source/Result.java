@@ -1,10 +1,10 @@
 package framework.source;
 
-/**
- * @author VYZH
- * @since 16.01.2018
- */
-public interface Result<E> {
+import framework.StructuredData;
 
-    void accept(E data);
+import java.util.Map;
+
+public interface Result {
+
+    void accept(StructuredData data, boolean isDone);
 }

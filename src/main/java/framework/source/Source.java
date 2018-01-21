@@ -1,11 +1,10 @@
 package framework.source;
 
-import java.util.Iterator;
+import framework.StructuredData;
 
-/**
- * @author VYZH
- * @since 11.01.2018
- */
-public interface Source<E> extends Iterator<E> {
+import java.util.Iterator;
+import java.util.Map;
+
+public interface Source extends Iterator<StructuredData> {
 
 }

@@ -1,17 +1,42 @@
 package framework.steps;
 
+import framework.StructuredData;
 import framework.source.Source;
 
-/**
- * @author VYZH
- * @since 11.01.2018
- */
-public class InputStep<E> extends Step<E> {
+import java.util.Map;
 
-    private Source<E> source;
+public class InputStep extends Step {
 
-    public InputStep(Source<E> source) {
+    private final Source source;
+
+    public InputStep(Source source, int threadCount) {
+        super(null, threadCount);
         this.source = source;
+    }
+
+    @Override
+    @SuppressWarnings("Duplicates")
+    public void start() {
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(() -> {
+                while (hasNext()) {
+                    synchronized (source) {
+                        if (hasNext()) {
+                            queue.offer(next());
+                        }
+                    }
+                }
+
+                if (threadCount.decrementAndGet() == 0) {
+                    done = true;
+                }
+            });
+            threads[i].setUncaughtExceptionHandler((t, e) -> {
+                System.out.println(e);
+                System.exit(1);
+            });
+            threads[i].start();
+        }
     }
 
     @Override
@@ -20,7 +45,7 @@ public class InputStep<E> extends Step<E> {
     }
 
     @Override
-    public E next() {
+    public StructuredData next() {
         return source.next();
     }
 }

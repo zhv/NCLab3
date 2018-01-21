@@ -1,31 +1,22 @@
-import framework.JavaRDD;
-import framework.Pipeline;
-import framework.PipelineBuilder;
-import framework.source.Result;
-import framework.source.Source;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Stream;
+import framework.pipeline.Pipeline;
+import framework.pipeline.PipelineBuilder;
+import framework.source.InputJSONSource;
+import framework.source.OutputXMLResult;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        JavaRDD<Integer> j1 = JavaRDD.parallelize(3,1,2,2);
-        JavaRDD<Integer> j2 = JavaRDD.parallelize(1,2,3,2,2);
+    public static void main(String[] args) {
 
-        System.out.println(j1);
-        System.out.println(j2);
-        System.out.println(j1.intersection(j2));
-    }
+        PipelineBuilder pb = new PipelineBuilder();
 
-    public void main2() {
-//        Pipeline pipeline = new Pipeline();
-        Source source = null;
-        Result result = null;
-        PipelineBuilder pipelineBuilder = new PipelineBuilder();
-        pipelineBuilder.inputStep(source);
+        pb.addInputStep(new InputJSONSource("text.json"), 1);
+
+        pb.addForEachStep(x -> x.put("date1", x.getAsDate("date", "d/MM/yyyy").plusYears(5).toString() + " - date"), 1);
+
+        pb.addOutputStep(new OutputXMLResult("text1.xml"), 1);
+
+        Pipeline p = pb.getPipeline();
+
+        p.start();
+
     }
 }
