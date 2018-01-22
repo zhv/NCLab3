@@ -50,4 +50,11 @@ public class StructuredData {
     public Set<Map.Entry<String,Object>> entrySet() {
         return data.entrySet();
     }
+
+    @Override
+    public String toString() {
+        return "StructuredData{" +
+                "data=" + data +
+                '}';
+    }
 }

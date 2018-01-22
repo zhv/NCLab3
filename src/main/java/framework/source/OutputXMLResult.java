@@ -10,12 +10,15 @@ import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.Map;
 
+// todo: close
 public class OutputXMLResult implements Result {
 
     private String path;
     private final String tagName;
     private volatile XMLEventWriter writer;
     private XMLEventFactory factory;
+
+    // todo: formatting - bad way
     private static final String TAB = "\t";
     private static final String END = "\n";
 
@@ -84,5 +87,10 @@ public class OutputXMLResult implements Result {
                 throw new IllegalFileFormatException(e);
             } catch (XMLStreamException ignore) { }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // todo
     }
 }

@@ -3,6 +3,7 @@ package framework.source;
 import framework.StructuredData;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -41,5 +42,10 @@ public class OutputJDBCResult implements Result {
                 throw new IllegalStateException(e);
             }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // todo
     }
 }

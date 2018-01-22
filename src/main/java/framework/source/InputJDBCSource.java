@@ -3,6 +3,7 @@ package framework.source;
 import framework.StructuredData;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ public class InputJDBCSource implements Source {
     private volatile Boolean next;
     private ResultSetMetaData metaData;
     private int columnCount;
+    private PreparedStatement preparedStatement;
 
     public InputJDBCSource(DataSource dataSource, String query, PreparedStatementBuilder preparedStatementBuilder) {
         this.dataSource = dataSource;
@@ -58,12 +60,25 @@ public class InputJDBCSource implements Source {
         if (resultSet == null) {
             try {
                 Connection connection = dataSource.getConnection();
-                PreparedStatement ps = connection.prepareStatement(query);
-                preparedStatementBuilder.prepare(ps, null);
-                ps.execute();
-                resultSet = ps.getResultSet();
+                preparedStatement = connection.prepareStatement(query);
+                preparedStatementBuilder.prepare(preparedStatement, null);
+                preparedStatement.execute();
+                resultSet = preparedStatement.getResultSet();
                 metaData = resultSet.getMetaData();
                 columnCount = metaData.getColumnCount();
+            } catch (SQLException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void close() throws IOException {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+                preparedStatement.close();
+                resultSet = null;
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }

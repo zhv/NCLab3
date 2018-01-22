@@ -86,4 +86,9 @@ public class OutputJSONResult implements Result {
             }
         }
     }
+
+    @Override
+    public void close() throws IOException {
+        // todo
+    }
 }

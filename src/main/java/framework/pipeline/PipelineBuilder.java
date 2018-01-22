@@ -1,15 +1,11 @@
 package framework.pipeline;
 
-import framework.StructuredData;
 import framework.source.Result;
 import framework.source.Source;
-import framework.steps.*;
+import framework.source.StepConnector;
+import framework.steps.Step;
 
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class PipelineBuilder {
 
@@ -17,44 +13,60 @@ public class PipelineBuilder {
     private boolean in = false;
     private boolean out = false;
 
+    private StepConnector connector;
 
     public void addInputStep(Source source, int threadCount) {
-        in = true;
-        pipeline.steps.add(new InputStep(source, threadCount));
+        connector = createConnector();
+        pipeline.steps.add(new StepWithThreads(createStep(source, connector), threadCount));
     }
 
     public void addOutputStep(Result result, int threadCount) {
-        if (pipeline.steps.size() != 0) {
-            out = true;
-            pipeline.steps.add(new OutputStep(result, pipeline.steps.get(pipeline.steps.size() - 1), threadCount));
+        if (connector == null) {
+            throw new IllegalStateException("Pipeline doesn't contain any previous step");
         }
+        pipeline.steps.add(new StepWithThreads(createStep(connector, result), threadCount));
+        connector = createConnector();
     }
 
-    public void addMapStep(UnaryOperator<StructuredData> function, int threadCount) {
-        if (pipeline.steps.size() != 0) {
-            pipeline.steps.add(new FunctionStep(pipeline.steps.get(pipeline.steps.size() - 1), threadCount, function));
+    public void addStep(Step step, int threadCount) {
+        if (connector == null) {
+            throw new IllegalStateException("Pipeline doesn't contain any previous step");
         }
+        StepConnector prevConnector = connector;
+        connector = createConnector();
+        pipeline.steps.add(new StepWithThreads(createStep(prevConnector, connector), threadCount));
     }
 
-    public void addForEachStep(Consumer<StructuredData> consumer, int threadCount) {
-        if (pipeline.steps.size() != 0) {
-            pipeline.steps.add(new ConsumerStep(pipeline.steps.get(pipeline.steps.size() - 1), threadCount, consumer));
-        }
-    }
+//    public void addMapStep(UnaryOperator<StructuredData> function, int threadCount) {
+//    }
+//        }
+//            pipeline.steps.add(new ConsumerStep(pipeline.steps.get(pipeline.steps.size() - 1), threadCount, consumer));
+//        if (pipeline.steps.size() != 0) {
+//        }
+//            throw new IllegalStateException("Pipeline doesn't contain any previous step");
+//        if (connector == null) {
+//    public void addForEachStep(Consumer<StructuredData> consumer, int threadCount) {
+//
+//    }
+//        }
+//            pipeline.steps.add(new FunctionStep(pipeline.steps.get(pipeline.steps.size() - 1), threadCount, function));
+//        if (pipeline.steps.size() != 0) {
+//        }
+//            throw new IllegalStateException("Pipeline doesn't contain any previous step");
+//        if (connector == null) {
 
     public Pipeline getPipeline() {
-        if (in && out) {
+        return pipeline;
+    }
 
-            while (!(pipeline.steps.get(0) instanceof InputStep)) {
-                pipeline.steps.remove(0);
-            }
-            while (!(pipeline.steps.get(pipeline.steps.size() - 1) instanceof OutputStep)) {
-                pipeline.steps.remove(pipeline.steps.size() - 1);
-            }
+    protected Step createStep(Source source, Result result) {
+        Step step = new Step();
+        step.setSource(source);
+        step.setResult(result);
+        return step;
+    }
 
-            return pipeline;
-        }
-
-        throw new PipelineNotReadyException("Pipeline not ready");
+    protected StepConnector createConnector() {
+        return new StepConnector(new LinkedBlockingQueue<>());
     }
 }

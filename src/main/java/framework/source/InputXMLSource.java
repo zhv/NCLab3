@@ -1,40 +1,35 @@
 package framework.source;
 
 import framework.StructuredData;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class InputXMLSource implements Source {
 
-    private String path;
+    private final InputStream input;
     private volatile XMLEventReader reader;
     private String prevStartElement;
     private String rowStartElement;
     private XMLEvent event;
     private StructuredData next;
+    private final XMLInputFactory factory;
 
-    public InputXMLSource(String path) {
-        this.path = path;
+    public InputXMLSource(InputStream input) {
+        this(input, XMLInputFactory.newFactory());
+    }
+
+    public InputXMLSource(InputStream input, XMLInputFactory factory) {
+        this.input = input;
+        this.factory = factory;
     }
 
     @Override
@@ -106,15 +101,16 @@ public class InputXMLSource implements Source {
     private synchronized void init() {
         if (reader == null) {
             try {
-                InputStream input = new FileInputStream(new File(path));
-                XMLInputFactory factory = XMLInputFactory.newInstance();
                 reader = factory.createXMLEventReader(input);
                 if (reader.hasNext())
                     event = reader.nextEvent();
                 next = next();
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException(e);
             } catch (XMLStreamException ignore) { }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // todo
     }
 }
