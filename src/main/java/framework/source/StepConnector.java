@@ -3,6 +3,7 @@ package framework.source;
 import framework.StructuredData;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class StepConnector implements Source, Result {
 
     private final BlockingQueue<StructuredData> queue;
-    private volatile StructuredData last;
+    private final BlockingQueue<StructuredData> internalQueue = new LinkedBlockingQueue<>();
 
     public StepConnector(BlockingQueue<StructuredData> queue) {
         this.queue = queue;
@@ -25,14 +26,14 @@ public class StepConnector implements Source, Result {
 
     @Override
     public boolean hasNext() {
-        getLast();
-        return last != null;
+        fetch();
+        return !internalQueue.isEmpty();
     }
 
     @Override
     public StructuredData next() {
-        getLast();
-        return last;
+        fetch();
+        return internalQueue.poll();
     }
 
     @Override
@@ -40,10 +41,12 @@ public class StepConnector implements Source, Result {
         // nothing to do
     }
 
-    protected synchronized void getLast() {
+    protected void fetch() {
         try {
-            last = null;
-            last = queue.poll(2, TimeUnit.SECONDS);
+            StructuredData data = queue.poll(2, TimeUnit.SECONDS);
+            if (data != null) {
+                internalQueue.put(data);
+            }
         } catch (InterruptedException ignore) { }
     }
 }

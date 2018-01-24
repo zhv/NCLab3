@@ -19,6 +19,10 @@ public class Pipeline {
 
     @Override
     public String toString() {
-        return "Pipeline(" + steps + ")";
+        StringBuilder sb = new StringBuilder("Pipeline(\n");
+        for (StepWithThreads step : steps) {
+            sb.append(step).append("\n");
+        }
+        return sb.append(")").toString();
     }
 }

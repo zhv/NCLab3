@@ -20,8 +20,15 @@ public class Step implements Runnable {
     @Override
     public void run() {
         try {
-            while (!Thread.interrupted() && source.hasNext()) {
-                StructuredData data = source.next();
+            while (!Thread.interrupted()) {
+                StructuredData data = null;
+                synchronized (source) {
+                    if (!source.hasNext()) {
+                        break;
+                    }
+                    data = source.next();
+                    System.out.println("got data = " + data + " : " + this);
+                }
                 result.accept(data, false);
             }
         } catch (Exception e) {
