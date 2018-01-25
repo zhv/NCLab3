@@ -1,72 +1,43 @@
 package framework.steps;
 
 import framework.StructuredData;
+import framework.source.Result;
+import framework.source.Source;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+public class Step implements Runnable {
 
-public abstract class Step implements Iterator<StructuredData> {
+    protected Source source;
+    protected Result result;
 
-    final Queue<StructuredData> queue;
-    final Step prev;
-    Thread[] threads;
-    boolean done = false;
-    AtomicInteger threadCount;
-
-
-    Step(Step prev, int threadCount) {
-        this.prev = prev;
-        this.threadCount = new AtomicInteger(threadCount);
-        threads = new Thread[threadCount];
-        queue = new ConcurrentLinkedQueue<>();
+    public void setSource(Source source) {
+        this.source = source;
     }
 
-    @SuppressWarnings("Duplicates")
-    public void start() {
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(() -> {
-                while (true) {
-                    StructuredData next = null;
-                    synchronized (prev) {
-                        if (hasNext()) {
-                            next = next();
-                        }
-                        else if (prev.done) {
-                            break;
-                        }
-                        else {
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException ignore) { }
-                        }
-                    }
-                    if (next != null) action(next, false);
-                }
+    public void setResult(Result result) {
+        this.result = result;
+    }
 
-                if (threadCount.decrementAndGet() == 0) {
-                    done = true;
+    @Override
+    public void run() {
+        try {
+            while (!Thread.interrupted()) {
+                StructuredData data = null;
+                synchronized (source) {
+                    if (!source.hasNext()) {
+                        break;
+                    }
+                    data = source.next();
+                    System.out.println("got data = " + data + " : " + this);
                 }
-            });
-            threads[i].setUncaughtExceptionHandler((t, e) -> {
-                System.out.println(e);
-                System.exit(1);
-            });
-            threads[i].start();
+                result.accept(data, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    protected void action(StructuredData next, boolean isDone) {}
-
     @Override
-    public boolean hasNext() {
-        return !prev.queue.isEmpty();
-    }
-
-    @Override
-    public StructuredData next() {
-        return prev.queue.poll();
+    public String toString() {
+        return "Step(" + source + " => " + result + ")";
     }
 }

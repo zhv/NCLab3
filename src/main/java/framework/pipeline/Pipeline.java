@@ -1,19 +1,28 @@
 package framework.pipeline;
 
-import framework.steps.Step;
-
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 public class Pipeline {
 
-    protected List<Step> steps = new LinkedList<>();
+    protected List<StepWithThreads> steps = new LinkedList<>();
 
-    public void start() {
-        for (Step s : steps) {
-            s.start();
+    public void start(ExecutorService executorService) {
+        for (StepWithThreads step : steps) {
+            for (int i = 0; i < step.getThreadCount(); i++) {
+                executorService.submit(step.getStep());
+            }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Pipeline(\n");
+        for (StepWithThreads step : steps) {
+            sb.append(step).append("\n");
+        }
+        return sb.append(")").toString();
     }
 }

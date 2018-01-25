@@ -1,17 +1,10 @@
 package framework.source;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import framework.StructuredData;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.XMLEvent;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,16 +13,18 @@ import java.util.Map;
 
 public class InputJSONSource implements Source {
 
-    private String path;
     private String datePattern;
     private volatile JsonParser jsonParser;
 
-    public InputJSONSource(String path) {
-        this.path = path;
+    private final InputStream input;
+
+    // todo: InputStream
+    public InputJSONSource(InputStream input) {
+        this.input = input;
     }
-    public InputJSONSource(String path, String datePattern) {
-        this.path = path;
+    public InputJSONSource(String datePattern, InputStream input) {
         this.datePattern = datePattern;
+        this.input = input;
     }
 
     @Override
@@ -97,12 +92,17 @@ public class InputJSONSource implements Source {
         if (jsonParser == null) {
             try {
                 JsonFactory jsonFactory = new JsonFactory();
-                jsonParser = jsonFactory.createParser(new File(path));
+                jsonParser = jsonFactory.createParser(input);
                 while (jsonParser.nextToken() != JsonToken.START_ARRAY) { }
                 jsonParser.nextToken();
             } catch (IOException e) {
                 throw new IllegalFileFormatException(e);
             }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // todo
     }
 }
