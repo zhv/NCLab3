@@ -4,67 +4,52 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import framework.StructuredData;
 
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class OutputJSONResult implements Result {
 
-    private String path;
+    private OutputStream output;
     private volatile JsonGenerator writer;
-    private static final String TAB = "\t";
-    private static final String END = "\n";
 
-    public OutputJSONResult(String path) {
-        this.path = path;
+    public OutputJSONResult(OutputStream output) {
+        this.output = output;
     }
 
     @Override
-    public void accept(StructuredData data, boolean isDone) {
-        if (!isDone){
-            init();
+    public synchronized void accept(StructuredData data) {
+        init();
 
-            try {
-                writer.writeRaw(TAB);
-                writer.writeStartObject();
-                writer.writeRaw(END + TAB + TAB);
+        try {
+            writer.writeStartObject();
 
-                for (Map.Entry<String, Object> e : data.entrySet()) {
-                    if (e.getValue() instanceof Double) {
-                        writer.writeNumberField(e.getKey(), (Double) e.getValue());
-                    } else if (e.getValue() instanceof Integer) {
-                        writer.writeNumberField(e.getKey(), (Integer) e.getValue());
-                    } else {
-                        writer.writeStringField(e.getKey(), e.getValue().toString());
-                    }
-                    writer.writeRaw(END + TAB + TAB);
+            for (Map.Entry<String, Object> e : data.getMap().entrySet()) {
+                if (e.getValue() instanceof Double) {
+                    writer.writeNumberField(e.getKey(), (Double) e.getValue());
+                } else if (e.getValue() instanceof Float) {
+                    writer.writeNumberField(e.getKey(), (Float) e.getValue());
+                } else if (e.getValue() instanceof Long) {
+                    writer.writeNumberField(e.getKey(), (Long) e.getValue());
+                } else if (e.getValue() instanceof Integer) {
+                    writer.writeNumberField(e.getKey(), (Integer) e.getValue());
+                } else if (e.getValue() instanceof Boolean) {
+                    writer.writeBooleanField(e.getKey(), (Boolean) e.getValue());
+                } else if (e.getValue() == null) {
+                    writer.writeNullField(e.getKey());
+                } else {
+                    writer.writeStringField(e.getKey(), e.getValue().toString());
                 }
-
-                writer.writeEndObject();
-                writer.writeRaw(END + TAB);
-
-                writer.flush();
-            } catch (IOException e) {
-                throw new IllegalFileFormatException(e);
-            }
-        } else {
-            try {
-                writer.writeEndArray();
-                writer.writeRaw(END);
-                writer.writeEndObject();
-            } catch (IOException e) {
-                throw new IllegalFileFormatException(e);
-            } finally {
-                try {
-                    writer.close();
-                } catch (IOException ignore) { }
             }
 
+            writer.writeEndObject();
+
+            writer.flush();
+        } catch (IOException e) {
+            throw new IllegalFileFormatException(e);
+        }
+
+        if (data.isLast()) {
+            close();
         }
     }
 
@@ -72,15 +57,11 @@ public class OutputJSONResult implements Result {
 
         if (writer == null) {
             try {
-                OutputStream output = new FileOutputStream(new File(path));
                 JsonFactory jsonFactory = new JsonFactory();
                 writer = jsonFactory.createGenerator(output);
                 writer.writeStartObject();
-                writer.writeRaw(END + TAB);
                 writer.writeFieldName("root");
-                writer.writeRaw(END + TAB);
                 writer.writeStartArray();
-                writer.writeRaw(END + TAB);
             } catch (IOException e) {
                 throw new IllegalFileFormatException(e);
             }
@@ -88,7 +69,17 @@ public class OutputJSONResult implements Result {
     }
 
     @Override
-    public void close() throws IOException {
-        // todo
+    public void close() {
+        try {
+            writer.writeEndArray();
+            writer.writeEndObject();
+        } catch (IOException e) {
+            throw new IllegalFileFormatException(e);
+        } finally {
+            try {
+                writer.close();
+                writer = null;
+            } catch (IOException ignore) { }
+        }
     }
 }

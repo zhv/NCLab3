@@ -90,12 +90,15 @@ public class InputXMLSource implements Source {
             } catch (XMLStreamException ignore) { }
         }
 
-        Map<String, Object> tmp = new LinkedHashMap<>(next.getMap());
+        StructuredData sd = new StructuredData(next.getMap());
 
-        if (row.isEmpty()) next = null;
+        if (row.isEmpty()) {
+            next = null;
+            sd.isLast(true);
+        }
         else next = new StructuredData(row);
 
-        return new StructuredData(tmp);
+        return sd;
     }
 
     private synchronized void init() {
@@ -110,7 +113,12 @@ public class InputXMLSource implements Source {
     }
 
     @Override
-    public void close() throws IOException {
-        // todo
+    public void close() {
+        try {
+            reader.close();
+            input.close();
+        } catch (XMLStreamException | IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

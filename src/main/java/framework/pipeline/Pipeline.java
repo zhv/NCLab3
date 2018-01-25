@@ -3,7 +3,6 @@ package framework.pipeline;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 public class Pipeline {
 

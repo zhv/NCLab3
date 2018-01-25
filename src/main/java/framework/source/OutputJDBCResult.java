@@ -3,11 +3,9 @@ package framework.source;
 import framework.StructuredData;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
 
 public class OutputJDBCResult implements Result {
 
@@ -23,13 +21,17 @@ public class OutputJDBCResult implements Result {
     }
 
     @Override
-    public void accept(StructuredData data, boolean isDone) {
+    public synchronized void accept(StructuredData data) {
         init();
         try {
             preparedStatementBuilder.prepare(ps, data);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException(e);
+        }
+
+        if (data.isLast()) {
+            close();
         }
     }
 
@@ -45,7 +47,12 @@ public class OutputJDBCResult implements Result {
     }
 
     @Override
-    public void close() throws IOException {
-        // todo
+    public void close() {
+        try {
+            ps.close();
+            ps = null;
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

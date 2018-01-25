@@ -1,14 +1,40 @@
 package framework.steps;
 
+import framework.FunctionExceptionAction;
 import framework.StructuredData;
 
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 public class FunctionStep extends Step {
 
-    private UnaryOperator<StructuredData> function;
+    private Function<Object, ?> function;
+    private String key;
+    private FunctionExceptionAction functionExceptionAction;
 
-    public FunctionStep(Step prev, int threadCount, UnaryOperator<StructuredData> function) {
+    public FunctionStep(String key, Function<Object, ?> function, FunctionExceptionAction functionExceptionAction) {
         this.function = function;
+        this.key = key;
+        this.functionExceptionAction = functionExceptionAction;
+    }
+
+    @Override
+    protected StructuredData action(StructuredData data) {
+
+        try {
+            Object value = data.getMap().get(key).toString();
+            Object newValue = function.apply(value);
+            data.getMap().put(key, newValue);
+        } catch (Exception e) {
+            if (functionExceptionAction == FunctionExceptionAction.THROW_EXCEPTION) {
+                e.printStackTrace();
+                System.exit(1);
+            } else if (functionExceptionAction == FunctionExceptionAction.STOP_PIPELINE) {
+                // todo
+            } else if (functionExceptionAction == FunctionExceptionAction.SKIP_STEP) {
+                return data;
+            }
+        }
+
+        return data;
     }
 }

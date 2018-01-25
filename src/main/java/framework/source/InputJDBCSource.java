@@ -28,13 +28,7 @@ public class InputJDBCSource implements Source {
     @Override
     public synchronized boolean hasNext() {
         init();
-        if (next == null) {
-            try {
-                next = resultSet.next();
-            } catch (SQLException e) {
-                throw new IllegalStateException(e);
-            }
-        }
+
         return next;
     }
 
@@ -52,8 +46,16 @@ public class InputJDBCSource implements Source {
 
         } catch (Exception ignore) { }
 
+        try {
+            next = resultSet.next();
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
 
-        return new StructuredData(row);
+        StructuredData sd = new StructuredData(row);
+        sd.isLast(!next);
+
+        return sd;
     }
 
     private synchronized void init() {
@@ -66,6 +68,7 @@ public class InputJDBCSource implements Source {
                 resultSet = preparedStatement.getResultSet();
                 metaData = resultSet.getMetaData();
                 columnCount = metaData.getColumnCount();
+                next = resultSet.next();
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }

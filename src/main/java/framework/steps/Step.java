@@ -21,7 +21,7 @@ public class Step implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                StructuredData data = null;
+                StructuredData data;
                 synchronized (source) {
                     if (!source.hasNext()) {
                         break;
@@ -29,11 +29,16 @@ public class Step implements Runnable {
                     data = source.next();
                     System.out.println("got data = " + data + " : " + this);
                 }
-                result.accept(data, false);
+                data = action(data);
+                result.accept(data);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected StructuredData action(StructuredData data) {
+        return data;
     }
 
     @Override

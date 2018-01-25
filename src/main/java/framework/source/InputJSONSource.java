@@ -7,23 +7,15 @@ import framework.StructuredData;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class InputJSONSource implements Source {
 
-    private String datePattern;
     private volatile JsonParser jsonParser;
-
     private final InputStream input;
 
-    // todo: InputStream
     public InputJSONSource(InputStream input) {
-        this.input = input;
-    }
-    public InputJSONSource(String datePattern, InputStream input) {
-        this.datePattern = datePattern;
         this.input = input;
     }
 
@@ -42,33 +34,19 @@ public class InputJSONSource implements Source {
         try {
             while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
 
-                if (jsonParser.currentToken() == JsonToken.START_ARRAY
-                        || jsonParser.currentToken() == JsonToken.START_OBJECT
-                        || jsonParser.currentToken() == JsonToken.NOT_AVAILABLE){
-                    throw new IllegalArgumentException("Illegal file format!");
-                }
-
                 String name = jsonParser.getCurrentName();
                 jsonParser.nextToken();
                 Object value = null;
 
-                if (datePattern == null) {
-                    try {
-                        LocalDate.parse(jsonParser.getValueAsString());
-                        value = LocalDate.parse(jsonParser.getValueAsString());
-                    } catch (Exception ignore) { }
-                } else {
-                    try {
-                        LocalDate.parse(jsonParser.getValueAsString(), DateTimeFormatter.ofPattern(datePattern));
-                        value = LocalDate.parse(jsonParser.getValueAsString(), DateTimeFormatter.ofPattern(datePattern));
-                    } catch (Exception ignore) { }
-                }
-
+                try {
+                    LocalDate.parse(jsonParser.getValueAsString());
+                    value = LocalDate.parse(jsonParser.getValueAsString());
+                } catch (Exception ignore) { }
 
                 if (value == null) {
                     if (jsonParser.getCurrentToken().isNumeric()) {
                         try {
-                            value = jsonParser.getValueAsInt();
+                            value = jsonParser.getValueAsLong();
                         } catch (Exception ignore) { }
 
                         if (value == null) value = jsonParser.getValueAsDouble();
@@ -82,8 +60,12 @@ public class InputJSONSource implements Source {
                 }
             }
             jsonParser.nextToken();
-            return new StructuredData(row);
-        } catch (IOException e) {
+
+            StructuredData sd = new StructuredData(row);
+            sd.isLast(jsonParser.getCurrentToken() == JsonToken.END_ARRAY);
+
+            return sd;
+        } catch (IOException | NullPointerException e) {
             throw new IllegalFileFormatException(e);
         }
     }
@@ -102,7 +84,12 @@ public class InputJSONSource implements Source {
     }
 
     @Override
-    public void close() throws IOException {
-        // todo
+    public void close() {
+        try {
+            jsonParser.close();
+            input.close();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

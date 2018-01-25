@@ -6,10 +6,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author VYZH
- * @since 22.01.2018
- */
 public class StepConnector implements Source, Result {
 
     private final BlockingQueue<StructuredData> queue;
@@ -20,7 +16,7 @@ public class StepConnector implements Source, Result {
     }
 
     @Override
-    public void accept(StructuredData data, boolean isDone) {
+    public void accept(StructuredData data) {
         queue.add(data);
     }
 
@@ -43,7 +39,7 @@ public class StepConnector implements Source, Result {
 
     protected void fetch() {
         try {
-            StructuredData data = queue.poll(2, TimeUnit.SECONDS);
+            StructuredData data = queue.poll(100, TimeUnit.MILLISECONDS);
             if (data != null) {
                 internalQueue.put(data);
             }
