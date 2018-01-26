@@ -7,13 +7,32 @@ import java.util.concurrent.ExecutorService;
 public class Pipeline {
 
     protected List<StepWithThreads> steps = new LinkedList<>();
+    private boolean isRunning = false;
 
     public void start(ExecutorService executorService) {
-        for (StepWithThreads step : steps) {
-            for (int i = 0; i < step.getThreadCount(); i++) {
-                executorService.submit(step.getStep());
+        if (!isRunning) {
+            for (StepWithThreads step : steps) {
+                for (int i = 0; i < step.getThreadCount(); i++) {
+                    executorService.submit(step.getStep());
+                }
             }
+
+            isRunning = true;
         }
+    }
+
+    public void stop() {
+        if (isRunning) {
+            for (StepWithThreads step : steps) {
+                step.getStep().setRunning(false);
+            }
+
+            isRunning = false;
+        }
+    }
+
+    public boolean isRunning() {
+        return isRunning;
     }
 
     @Override

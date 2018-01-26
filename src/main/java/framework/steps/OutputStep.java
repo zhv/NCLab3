@@ -1,6 +1,7 @@
 package framework.steps;
 
 import framework.StructuredData;
+import framework.Tuple;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,11 +14,11 @@ public class OutputStep extends Step {
     }
 
     @Override
-    protected StructuredData action(StructuredData data) {
+    protected Tuple<StructuredData, Boolean> action(StructuredData data) {
 
         if (data.isLast() && inputCount.decrementAndGet() != 0)
             data.isLast(false);
 
-        return data;
+        return new Tuple<>(data, false);
     }
 }

@@ -54,27 +54,30 @@ public class PipelineBuilder {
         return pipeline;
     }
 
-    protected Step createStep(Source source, Result result) {
+    private Step createStep(Source source, Result result) {
         Step step = new Step();
         step.setSource(source);
         step.setResult(result);
+        step.setPipeline(pipeline);
         return step;
     }
 
-    protected Step createStep(Source source, Result result, Step step) {
+    private Step createStep(Source source, Result result, Step step) {
         step.setSource(source);
         step.setResult(result);
+        step.setPipeline(pipeline);
         return step;
     }
 
-    protected Step createOutputStep(Source source, Result result, int inputStepCount) {
+    private Step createOutputStep(Source source, Result result, int inputStepCount) {
         Step step = new OutputStep(inputStepCount);
         step.setSource(source);
         step.setResult(result);
+        step.setPipeline(pipeline);
         return step;
     }
 
-    protected StepConnector createConnector() {
+    private StepConnector createConnector() {
         return new StepConnector(new LinkedBlockingQueue<>());
     }
 }

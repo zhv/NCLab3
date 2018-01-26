@@ -95,8 +95,11 @@ public class InputXMLSource implements Source {
         if (row.isEmpty()) {
             next = null;
             sd.isLast(true);
+            close();
         }
-        else next = new StructuredData(row);
+        else {
+            next = new StructuredData(row);
+        }
 
         return sd;
     }

@@ -53,7 +53,11 @@ public class InputJDBCSource implements Source {
         }
 
         StructuredData sd = new StructuredData(row);
-        sd.isLast(!next);
+
+        if (!next) {
+            sd.isLast(true);
+            close();
+        }
 
         return sd;
     }
@@ -76,12 +80,11 @@ public class InputJDBCSource implements Source {
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         if (resultSet != null) {
             try {
-                resultSet.close();
                 preparedStatement.close();
-                resultSet = null;
+                resultSet.close();
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }

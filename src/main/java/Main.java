@@ -139,20 +139,25 @@ public class Main {
         pb.addInputStep(new Source() {
 
             AtomicInteger id = new AtomicInteger();
+            Integer next = id.get();
+            static final int COUNT = 10;
 
             @Override
-            public void close() throws IOException {
-
+            public void close() {
+                // nothing to do
             }
 
             @Override
             public boolean hasNext() {
-                return id.get() < 100;
+                return next < COUNT;
             }
 
             @Override
             public StructuredData next() {
-                return new StructuredData(Collections.singletonMap("a", id.getAndIncrement()));
+                StructuredData res = new StructuredData(Collections.singletonMap("a", next));
+                next = id.getAndIncrement();
+                res.isLast(next == COUNT);
+                return res;
             }
         }, 10);
 
@@ -213,12 +218,12 @@ public class Main {
     private static void runXMLExample() throws InterruptedException, FileNotFoundException {
         PipelineBuilder pb = new PipelineBuilder();
 
-
         String data = "<root>\n" +
                 "    <a><b>1</b></a>\n" +
                 "    <a><b>2</b></a>\n" +
                 "    <a><b>3</b></a>\n" +
                 "</root>";
+
         pb.addInputStep(new InputXMLSource(new ByteArrayInputStream(data.getBytes())), 1);
 
         pb.addStep(new Step() {
@@ -243,14 +248,20 @@ public class Main {
     private static void runFunctionExample() throws InterruptedException, FileNotFoundException {
         PipelineBuilder pb = new PipelineBuilder();
 
-        pb.addInputStep(new InputXMLSource(new FileInputStream("test.xml")), 1);
+        String data = "<root>\n" +
+                "    <a><b>1</b></a>\n" +
+                "    <a><b>2</b></a>\n" +
+                "    <a><b>3</b></a>\n" +
+                "</root>";
+
+        pb.addInputStep(new InputXMLSource(new ByteArrayInputStream(data.getBytes())), 1);
 
         Function<Object, Integer> convert = (x) -> {
             System.out.println("Converting: " + x);
             return Integer.parseInt(x.toString());
         };
 
-        pb.addFunction("age1", convert, FunctionExceptionAction.STOP_PIPELINE, 1);
+        pb.addFunction("b", convert, FunctionExceptionAction.STOP_PIPELINE, 1);
 
         pb.addOutputStep(new OutputJSONResult(new FileOutputStream("test1.json")), 1);
 
