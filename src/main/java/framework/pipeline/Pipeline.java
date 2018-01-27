@@ -23,10 +23,6 @@ public class Pipeline {
 
     public void stop() {
         if (isRunning) {
-            for (StepWithThreads step : steps) {
-                step.getStep().setRunning(false);
-            }
-
             isRunning = false;
         }
     }

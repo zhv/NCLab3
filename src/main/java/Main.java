@@ -261,7 +261,7 @@ public class Main {
             return Integer.parseInt(x.toString());
         };
 
-        pb.addFunction("b", convert, FunctionExceptionAction.STOP_PIPELINE, 1);
+        pb.addFunction("a", convert, FunctionExceptionAction.STOP_PIPELINE, 1);
 
         pb.addOutputStep(new OutputJSONResult(new FileOutputStream("test1.json")), 1);
 

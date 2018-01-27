@@ -10,7 +10,6 @@ public class Step implements Runnable {
 
     protected Source source;
     protected Result result;
-    private boolean isRunning = true;
     private Pipeline pipeline;
 
 
@@ -24,10 +23,6 @@ public class Step implements Runnable {
 
     public void setPipeline(Pipeline pipeline) {
         this.pipeline = pipeline;
-    }
-
-    public void setRunning(boolean running) {
-        isRunning = running;
     }
 
     @Override
@@ -50,7 +45,7 @@ public class Step implements Runnable {
                     pipeline.stop();
                 }
 
-                if (!isRunning) {
+                if (!pipeline.isRunning()) {
                     System.out.println(this + " stopped");
                     break;
                 }
