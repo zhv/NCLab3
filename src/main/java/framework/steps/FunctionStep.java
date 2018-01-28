@@ -2,7 +2,6 @@ package framework.steps;
 
 import framework.FunctionExceptionAction;
 import framework.StructuredData;
-import framework.Tuple;
 
 import java.util.function.Function;
 
@@ -19,7 +18,7 @@ public class FunctionStep extends Step {
     }
 
     @Override
-    protected Tuple<StructuredData, Boolean> action(StructuredData data) {
+    protected StructuredData action(StructuredData data) {
 
         try {
             Object value = data.getMap().get(key).toString();
@@ -27,13 +26,13 @@ public class FunctionStep extends Step {
             data.getMap().put(key, newValue);
         } catch (Exception e) {
             if (functionExceptionAction == FunctionExceptionAction.THROW_EXCEPTION) {
-                e.printStackTrace();
-                System.exit(1);
+                throw new IllegalStateException(e);
             } else if (functionExceptionAction == FunctionExceptionAction.STOP_PIPELINE) {
-                return new Tuple<>(data, true);
+                status.setRunning(false);
+                return null;
             }
         }
 
-        return new Tuple<>(data, false);
+        return data;
     }
 }

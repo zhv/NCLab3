@@ -48,7 +48,7 @@ public class OutputJSONResult implements Result {
             throw new IllegalFileFormatException(e);
         }
 
-        if (data.isLast()) {
+        if (data.setLast()) {
             close();
         }
     }

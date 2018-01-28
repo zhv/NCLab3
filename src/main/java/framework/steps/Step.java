@@ -1,8 +1,7 @@
 package framework.steps;
 
 import framework.StructuredData;
-import framework.Tuple;
-import framework.pipeline.Pipeline;
+import framework.pipeline.PipelineStatus;
 import framework.source.Result;
 import framework.source.Source;
 
@@ -10,7 +9,7 @@ public class Step implements Runnable {
 
     protected Source source;
     protected Result result;
-    private Pipeline pipeline;
+    protected PipelineStatus status;
 
 
     public void setSource(Source source) {
@@ -21,8 +20,8 @@ public class Step implements Runnable {
         this.result = result;
     }
 
-    public void setPipeline(Pipeline pipeline) {
-        this.pipeline = pipeline;
+    public void setStatus(PipelineStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -38,19 +37,13 @@ public class Step implements Runnable {
                     System.out.println("got data = " + data + " : " + this);
                 }
 
-                Tuple<StructuredData, Boolean> actionRes = action(data);
+                data = action(data);
 
-                if (actionRes.getItem2() && pipeline.isRunning()) {
-                    System.out.println(pipeline + " stopped");
-                    pipeline.stop();
-                }
-
-                if (!pipeline.isRunning()) {
+                if (!status.isRunning()) {
                     System.out.println(this + " stopped");
                     break;
                 }
 
-                data = actionRes.getItem1();
                 result.accept(data);
             }
         } catch (Exception e) {
@@ -58,8 +51,8 @@ public class Step implements Runnable {
         }
     }
 
-    protected Tuple<StructuredData, Boolean> action(StructuredData data) {
-        return new Tuple<>(data, false);
+    protected StructuredData action(StructuredData data) {
+        return data;
     }
 
     @Override

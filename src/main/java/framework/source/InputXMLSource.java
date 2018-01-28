@@ -94,7 +94,7 @@ public class InputXMLSource implements Source {
 
         if (row.isEmpty()) {
             next = null;
-            sd.isLast(true);
+            sd.setLast(true);
             close();
         }
         else {

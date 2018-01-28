@@ -58,14 +58,14 @@ public class PipelineBuilder {
         Step step = new Step();
         step.setSource(source);
         step.setResult(result);
-        step.setPipeline(pipeline);
+        step.setStatus(pipeline.getStatus());
         return step;
     }
 
     private Step createStep(Source source, Result result, Step step) {
         step.setSource(source);
         step.setResult(result);
-        step.setPipeline(pipeline);
+        step.setStatus(pipeline.getStatus());
         return step;
     }
 
@@ -73,7 +73,7 @@ public class PipelineBuilder {
         Step step = new OutputStep(inputStepCount);
         step.setSource(source);
         step.setResult(result);
-        step.setPipeline(pipeline);
+        step.setStatus(pipeline.getStatus());
         return step;
     }
 

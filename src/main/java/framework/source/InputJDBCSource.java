@@ -3,7 +3,6 @@ package framework.source;
 import framework.StructuredData;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class InputJDBCSource implements Source {
         StructuredData sd = new StructuredData(row);
 
         if (!next) {
-            sd.isLast(true);
+            sd.setLast(true);
             close();
         }
 

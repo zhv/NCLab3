@@ -18,11 +18,11 @@ public class StructuredData {
         return data;
     }
 
-    public boolean isLast() {
+    public boolean setLast() {
         return isLast;
     }
 
-    public void isLast(boolean isLast) {
+    public void setLast(boolean isLast) {
         this.isLast = isLast;
     }
 

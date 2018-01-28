@@ -13,6 +13,7 @@ public class OutputJDBCResult implements Result {
     private String query;
     private PreparedStatementBuilder preparedStatementBuilder;
     private PreparedStatement ps;
+    private Connection connection;
 
     public OutputJDBCResult(DataSource dataSource, String query, PreparedStatementBuilder preparedStatementBuilder) {
         this.dataSource = dataSource;
@@ -26,11 +27,12 @@ public class OutputJDBCResult implements Result {
         try {
             preparedStatementBuilder.prepare(ps, data);
             ps.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
 
-        if (data.isLast()) {
+        if (data.setLast()) {
             close();
         }
     }
@@ -38,7 +40,7 @@ public class OutputJDBCResult implements Result {
     private synchronized void init() {
         if (ps == null) {
             try {
-                Connection connection = dataSource.getConnection();
+                connection = dataSource.getConnection();
                 ps = connection.prepareStatement(query);
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
@@ -50,6 +52,7 @@ public class OutputJDBCResult implements Result {
     public void close() {
         try {
             ps.close();
+            connection.close();
             ps = null;
         } catch (SQLException e) {
             throw new IllegalStateException(e);

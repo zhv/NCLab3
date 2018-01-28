@@ -39,7 +39,7 @@ public class OutputXMLResult implements Result {
 
         } catch (XMLStreamException ignore) { }
 
-        if (data.isLast()) {
+        if (data.setLast()) {
             close();
         }
     }

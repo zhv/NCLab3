@@ -156,7 +156,7 @@ public class Main {
             public StructuredData next() {
                 StructuredData res = new StructuredData(Collections.singletonMap("a", next));
                 next = id.getAndIncrement();
-                res.isLast(next == COUNT);
+                res.setLast(next == COUNT);
                 return res;
             }
         }, 10);

@@ -64,7 +64,7 @@ public class InputJSONSource implements Source {
             StructuredData sd = new StructuredData(row);
 
             if (jsonParser.getCurrentToken() == JsonToken.END_ARRAY) {
-                sd.isLast(true);
+                sd.setLast(true);
                 close();
             }
 
