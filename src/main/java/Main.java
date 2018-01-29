@@ -21,12 +21,12 @@ import java.util.function.Function;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        runJDBCExample();
+//        runJDBCExample();
         runJSONExample();
-        runXMLExample();
-        runCustomExample();
-        runFunctionExample();
-        runMultiSourceExample();
+//        runXMLExample();
+//        runCustomExample();
+//        runFunctionExample();
+//        runMultiSourceExample();
     }
 
     private static void runMultiSourceExample() throws InterruptedException, FileNotFoundException  {
@@ -156,7 +156,6 @@ public class Main {
             public StructuredData next() {
                 StructuredData res = new StructuredData(Collections.singletonMap("a", next));
                 next = id.getAndIncrement();
-                res.setLast(next == COUNT);
                 return res;
             }
         }, 10);

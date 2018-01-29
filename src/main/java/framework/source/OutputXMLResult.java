@@ -38,10 +38,6 @@ public class OutputXMLResult implements Result {
             writer.flush();
 
         } catch (XMLStreamException ignore) { }
-
-        if (data.setLast()) {
-            close();
-        }
     }
 
     private synchronized void init() {

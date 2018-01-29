@@ -63,11 +63,6 @@ public class InputJSONSource implements Source {
 
             StructuredData sd = new StructuredData(row);
 
-            if (jsonParser.getCurrentToken() == JsonToken.END_ARRAY) {
-                sd.setLast(true);
-                close();
-            }
-
             return sd;
         } catch (IOException | NullPointerException e) {
             throw new IllegalFileFormatException(e);

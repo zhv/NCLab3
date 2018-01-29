@@ -31,10 +31,6 @@ public class OutputJDBCResult implements Result {
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
-
-        if (data.setLast()) {
-            close();
-        }
     }
 
     private synchronized void init() {

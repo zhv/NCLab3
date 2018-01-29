@@ -53,11 +53,6 @@ public class InputJDBCSource implements Source {
 
         StructuredData sd = new StructuredData(row);
 
-        if (!next) {
-            sd.setLast(true);
-            close();
-        }
-
         return sd;
     }
 

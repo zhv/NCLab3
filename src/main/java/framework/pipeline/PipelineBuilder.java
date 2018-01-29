@@ -5,10 +5,10 @@ import framework.source.Result;
 import framework.source.Source;
 import framework.source.StepConnector;
 import framework.steps.FunctionStep;
-import framework.steps.OutputStep;
 import framework.steps.Step;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class PipelineBuilder {
@@ -20,7 +20,7 @@ public class PipelineBuilder {
 
     public void addInputStep(Source source, int threadCount) {
         if (connector == null) connector = createConnector();
-        pipeline.steps.add(new StepWithThreads(createStep(source, connector), threadCount));
+        pipeline.steps.add(new StepWithThreads(createStep(source, connector, threadCount), threadCount));
         inputStepCount++;
     }
 
@@ -28,7 +28,7 @@ public class PipelineBuilder {
         if (connector == null) {
             throw new PipelineNotReadyException("Pipeline doesn't contain any previous step");
         }
-        pipeline.steps.add(new StepWithThreads(createOutputStep(connector, result, inputStepCount), threadCount));
+        pipeline.steps.add(new StepWithThreads(createStep(connector, result, threadCount), threadCount));
     }
 
     public void addStep(Step step, int threadCount) {
@@ -37,7 +37,7 @@ public class PipelineBuilder {
         }
         StepConnector prevConnector = connector;
         connector = createConnector();
-        pipeline.steps.add(new StepWithThreads(createStep(prevConnector, connector, step), threadCount));
+        pipeline.steps.add(new StepWithThreads(createStep(prevConnector, connector, step, threadCount), threadCount));
     }
 
     public void addFunction(String key, Function<Object, ?> function, FunctionExceptionAction functionExceptionAction, int threadCount) {
@@ -47,33 +47,27 @@ public class PipelineBuilder {
         StepConnector prevConnector = connector;
         connector = createConnector();
         Step step = new FunctionStep(key, function, functionExceptionAction);
-        pipeline.steps.add(new StepWithThreads(createStep(prevConnector, connector, step), threadCount));
+        pipeline.steps.add(new StepWithThreads(createStep(prevConnector, connector, step, threadCount), threadCount));
     }
 
     public Pipeline getPipeline() {
         return pipeline;
     }
 
-    private Step createStep(Source source, Result result) {
+    private Step createStep(Source source, Result result, int threadCount) {
         Step step = new Step();
         step.setSource(source);
         step.setResult(result);
         step.setStatus(pipeline.getStatus());
+        step.setThreadCount(new AtomicInteger(threadCount));
         return step;
     }
 
-    private Step createStep(Source source, Result result, Step step) {
+    private Step createStep(Source source, Result result, Step step, int threadCount) {
         step.setSource(source);
         step.setResult(result);
         step.setStatus(pipeline.getStatus());
-        return step;
-    }
-
-    private Step createOutputStep(Source source, Result result, int inputStepCount) {
-        Step step = new OutputStep(inputStepCount);
-        step.setSource(source);
-        step.setResult(result);
-        step.setStatus(pipeline.getStatus());
+        step.setThreadCount(new AtomicInteger(threadCount));
         return step;
     }
 

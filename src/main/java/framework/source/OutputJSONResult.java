@@ -47,10 +47,6 @@ public class OutputJSONResult implements Result {
         } catch (IOException e) {
             throw new IllegalFileFormatException(e);
         }
-
-        if (data.setLast()) {
-            close();
-        }
     }
 
     private synchronized void init() {

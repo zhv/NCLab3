@@ -5,11 +5,14 @@ import framework.pipeline.PipelineStatus;
 import framework.source.Result;
 import framework.source.Source;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Step implements Runnable {
 
     protected Source source;
     protected Result result;
     protected PipelineStatus status;
+    private AtomicInteger threadCount;
 
 
     public void setSource(Source source) {
@@ -22,6 +25,10 @@ public class Step implements Runnable {
 
     public void setStatus(PipelineStatus status) {
         this.status = status;
+    }
+
+    public void setThreadCount(AtomicInteger threadCount) {
+        this.threadCount = threadCount;
     }
 
     @Override
@@ -45,6 +52,11 @@ public class Step implements Runnable {
                 }
 
                 result.accept(data);
+            }
+
+            if (threadCount.decrementAndGet() == 0) {
+                source.close();
+                result.close();
             }
         } catch (Exception e) {
             e.printStackTrace();

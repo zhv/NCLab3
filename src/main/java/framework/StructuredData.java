@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class StructuredData {
     private Map<String, Object> data;
-    private boolean isLast = false;
 
     public StructuredData(Map<String, Object> data) {
         this.data = new LinkedHashMap<>(data);
@@ -16,14 +15,6 @@ public class StructuredData {
 
     public Map<String, Object> getMap() {
         return data;
-    }
-
-    public boolean setLast() {
-        return isLast;
-    }
-
-    public void setLast(boolean isLast) {
-        this.isLast = isLast;
     }
 
     @Override
