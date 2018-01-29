@@ -56,15 +56,17 @@ public class OutputXMLResult implements Result {
 
     @Override
     public void close() {
-        try {
-            writer.add(this.factory.createEndElement("", "", "root"));
-            writer.flush();
-        } catch (XMLStreamException ignore) { }
-        finally {
+        if (writer != null) {
             try {
-                writer.close();
-                writer = null;
+                writer.add(this.factory.createEndElement("", "", "root"));
+                writer.flush();
             } catch (XMLStreamException ignore) { }
+            finally {
+                try {
+                    writer.close();
+                    writer = null;
+                } catch (XMLStreamException ignore) { }
+            }
         }
     }
 }

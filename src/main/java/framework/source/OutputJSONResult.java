@@ -66,16 +66,19 @@ public class OutputJSONResult implements Result {
 
     @Override
     public void close() {
-        try {
-            writer.writeEndArray();
-            writer.writeEndObject();
-        } catch (IOException e) {
-            throw new IllegalFileFormatException(e);
-        } finally {
+        if (writer != null) {
             try {
-                writer.close();
-                writer = null;
-            } catch (IOException ignore) { }
+                writer.writeEndArray();
+                writer.writeEndObject();
+            } catch (IOException e) {
+                throw new IllegalFileFormatException(e);
+            } finally {
+                try {
+                    writer.close();
+                    writer = null;
+                } catch (IOException ignore) {
+                }
+            }
         }
     }
 }

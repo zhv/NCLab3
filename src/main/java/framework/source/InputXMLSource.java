@@ -115,11 +115,14 @@ public class InputXMLSource implements Source {
 
     @Override
     public void close() {
-        try {
-            reader.close();
-            input.close();
-        } catch (XMLStreamException | IOException e) {
-            throw new IllegalStateException(e);
+        if (reader != null) {
+            try {
+                reader.close();
+                input.close();
+                reader = null;
+            } catch (XMLStreamException | IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 }

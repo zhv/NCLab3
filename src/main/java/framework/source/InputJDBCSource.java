@@ -79,6 +79,7 @@ public class InputJDBCSource implements Source {
             try {
                 preparedStatement.close();
                 resultSet.close();
+                resultSet = null;
             } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }

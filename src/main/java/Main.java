@@ -21,12 +21,12 @@ import java.util.function.Function;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        runJDBCExample();
+        runJDBCExample();
         runJSONExample();
-//        runXMLExample();
-//        runCustomExample();
-//        runFunctionExample();
-//        runMultiSourceExample();
+        runXMLExample();
+        runCustomExample();
+        runFunctionExample();
+        runMultiSourceExample();
     }
 
     private static void runMultiSourceExample() throws InterruptedException, FileNotFoundException  {
@@ -188,7 +188,7 @@ public class Main {
                 "   ] " +
                 "}";
 
-        pb.addInputStep(new InputJSONSource(new ByteArrayInputStream(data.getBytes())), 1);
+        pb.addInputStep(new InputJSONSource(new ByteArrayInputStream(data.getBytes())), 5);
 
         pb.addStep(new Step() {
             @Override
@@ -203,7 +203,7 @@ public class Main {
             }
         }, 3);
 
-        pb.addOutputStep(new OutputJSONResult(new FileOutputStream("test1.json")), 1);
+        pb.addOutputStep(new OutputJSONResult(new FileOutputStream("test1.json")), 5);
 
         Pipeline p = pb.getPipeline();
         System.out.println(p);

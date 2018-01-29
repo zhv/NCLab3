@@ -46,12 +46,15 @@ public class OutputJDBCResult implements Result {
 
     @Override
     public void close() {
-        try {
-            ps.close();
-            connection.close();
-            ps = null;
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
+        if (connection != null || ps != null) {
+            try {
+                ps.close();
+                connection.close();
+                ps = null;
+                connection = null;
+            } catch (SQLException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 }

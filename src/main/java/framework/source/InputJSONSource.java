@@ -84,11 +84,14 @@ public class InputJSONSource implements Source {
 
     @Override
     public void close() {
-        try {
-            jsonParser.close();
-            input.close();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+        if (jsonParser != null) {
+            try {
+                jsonParser.close();
+                input.close();
+                jsonParser = null;
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 }
